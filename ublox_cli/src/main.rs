@@ -215,11 +215,18 @@ fn main() {
                     println!("Flags: {:?}", status.flags());
                 }
                 PacketRef::NavRelPosNed(rel_pos_ned) => {
-                    println!("itow: {}", rel_pos_ned.itow());
-                    println!("ned: {} {} {} hdg: {} len: {}", rel_pos_ned.rel_pos_n(), rel_pos_ned.rel_pos_e(), rel_pos_ned.rel_pos_d(),
-                        rel_pos_ned.rel_pos_heading(), rel_pos_ned.rel_pos_length(),
+                    println!("n: {:.3} \u{00B1} {:.2} e: {:.3} \u{00B1} {:.2} d: {:.3} \u{00B1} {:.2} hdg: {:.3} \u{00B1} {:.2} len: {:.3} \u{00B1} {:.2}", 
+                        rel_pos_ned.rel_pos_n() + rel_pos_ned.rel_pos_hpn(), 
+                        rel_pos_ned.acc_n(),
+                        rel_pos_ned.rel_pos_e() + rel_pos_ned.rel_pos_hpe(), 
+                        rel_pos_ned.acc_e(),
+                        rel_pos_ned.rel_pos_d() +  rel_pos_ned.rel_pos_hpd(),
+                        rel_pos_ned.acc_d(),
+                        rel_pos_ned.rel_pos_heading(), 
+                        rel_pos_ned.acc_heading(),
+                        rel_pos_ned.rel_pos_length() + rel_pos_ned.rel_pos_hplength(),
+                        rel_pos_ned.acc_length(),
                     );
-                    println!("flags: {:08x}", rel_pos_ned.flags());
                 }
                 PacketRef::Unknown(unk) => {
                     println!("{:?}", unk);

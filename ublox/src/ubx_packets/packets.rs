@@ -322,20 +322,34 @@ struct NavRelPosNed {
     reserved0: u8,
     ref_station_id: u16,
     itow: u32,
+    #[ubx(map_type = f64)]
     rel_pos_n: i32,
+    #[ubx(map_type = f64)]
     rel_pos_e: i32,
+    #[ubx(map_type = f64)]
     rel_pos_d: i32,
+    #[ubx(map_type = f64)]
     rel_pos_length: i32,
+    #[ubx(map_type = f64, scale = 1e-5)]
     rel_pos_heading: i32,
     reserved1: [u8; 4],
+    #[ubx(map_type = f64, scale = 1e-2)]
     rel_pos_hpn: i8,
+    #[ubx(map_type = f64, scale = 1e-2)]
     rel_pos_hpe: i8,
+    #[ubx(map_type = f64, scale = 1e-2)]
     rel_pos_hpd: i8,
+    #[ubx(map_type = f64, scale = 1e-2)]
     rel_pos_hplength: i8,
+    #[ubx(map_type = f64, scale = 1e-2)]
     acc_n: u32,
+    #[ubx(map_type = f64, scale = 1e-2)]
     acc_e: u32,
+    #[ubx(map_type = f64, scale = 1e-2)]
     acc_d: u32,
+    #[ubx(map_type = f64, scale = 1e-2)]
     acc_length: u32,
+    #[ubx(map_type = f64, scale = 1e-5)]
     acc_heading: u32,
     reserved2: [u8; 4],
     flags: u32,
