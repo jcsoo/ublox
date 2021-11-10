@@ -314,6 +314,33 @@ struct NavSolution {
     reserved2: [u8; 4],
 }
 
+/// Relative Positioning Information in NED frame
+#[ubx_packet_recv]
+#[ubx(class = 1, id = 0x3c, fixed_payload_len = 64)]
+struct NavRelPosNed {
+    version: u8,
+    reserved0: u8,
+    ref_station_id: u16,
+    itow: u32,
+    rel_pos_n: i32,
+    rel_pos_e: i32,
+    rel_pos_d: i32,
+    rel_pos_length: i32,
+    rel_pos_heading: i32,
+    reserved1: [u8; 4],
+    rel_pos_hpn: i8,
+    rel_pos_hpe: i8,
+    rel_pos_hpd: i8,
+    rel_pos_hplength: i8,
+    acc_n: u32,
+    acc_e: u32,
+    acc_d: u32,
+    acc_length: u32,
+    acc_heading: u32,
+    reserved2: [u8; 4],
+    flags: u32,
+}
+
 /// GPS fix Type
 #[ubx_extend]
 #[ubx(from, rest_reserved)]
@@ -1079,6 +1106,7 @@ mod mon_ver {
 define_recv_packets!(
     enum PacketRef {
         _ = UbxUnknownPacketRef,
+        NavRelPosNed,
         NavPosLlh,
         NavStatus,
         NavDop,

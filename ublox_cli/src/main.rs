@@ -134,14 +134,44 @@ fn main() {
         .unwrap();
     device.wait_for_ack::<CfgPrtUart>().unwrap();
 
-    // Enable the NavPosVelTime packet
+    // Enable the NavStatus packet
+    // device
+    //     .write_all(
+    //         &CfgMsgSinglePortBuilder::set_rate_for::<NavStatus>(1)
+    //             .into_packet_bytes(),
+    //     )
+    //     .unwrap();
+    // device.wait_for_ack::<CfgMsgSinglePort>().unwrap();
+
     device
         .write_all(
-            &CfgMsgAllPortsBuilder::set_rate_for::<NavPosVelTime>([0, 1, 0, 0, 0, 0])
+            &CfgMsgSinglePortBuilder::set_rate_for::<NavRelPosNed>(1)
                 .into_packet_bytes(),
         )
         .unwrap();
-    device.wait_for_ack::<CfgMsgAllPorts>().unwrap();
+    device.wait_for_ack::<CfgMsgSinglePort>().unwrap();
+
+
+
+    // // Enable the NavPosVelTime packet
+    // device
+    //     .write_all(
+    //         &CfgMsgSinglePortBuilder::set_rate_for::<NavPosVelTime>(1)
+    //             .into_packet_bytes(),
+    //     )
+    //     .unwrap();
+    // device.wait_for_ack::<CfgMsgSinglePort>().unwrap();
+
+
+    // // Enable the NavPosVelTime packet
+    // device
+    //     .write_all(
+    //         &CfgMsgAllPortsBuilder::set_rate_for::<NavPosVelTime>([0, 1, 0, 0, 0, 0])
+    //             .into_packet_bytes(),
+    //     )
+    //     .unwrap();
+    // device.wait_for_ack::<CfgMsgAllPorts>().unwrap();
+
 
     // Send a packet request for the MonVer packet
     device
@@ -179,7 +209,25 @@ fn main() {
                         println!("Time: {:?}", time);
                     }
                 }
-                _ => {}
+                PacketRef::NavStatus(status) => {
+                    println!("TimeOfWeek: {}", status.itow());
+                    println!("Fix Type: {:?}", status.fix_type());
+                    println!("Flags: {:?}", status.flags());
+                }
+                PacketRef::NavRelPosNed(rel_pos_ned) => {
+                    println!("itow: {}", rel_pos_ned.itow());
+                    println!("ned: {} {} {} hdg: {} len: {}", rel_pos_ned.rel_pos_n(), rel_pos_ned.rel_pos_e(), rel_pos_ned.rel_pos_d(),
+                        rel_pos_ned.rel_pos_heading(), rel_pos_ned.rel_pos_length(),
+                    );
+                    println!("flags: {:08x}", rel_pos_ned.flags());
+                }
+                PacketRef::Unknown(unk) => {
+                    println!("{:?}", unk);
+                    // println!("msg_id: {} class: {} payload: {:?}", unk.msg_id, unk.class, )
+                }
+                _ => {
+                    println!("unhandled packet");
+                }
             }
         }).unwrap();
     }
