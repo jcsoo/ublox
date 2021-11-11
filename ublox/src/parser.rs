@@ -1,10 +1,7 @@
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
-use crate::{
-    error::ParserError,
-    ubx_packets::{match_packet, PacketRef, MAX_PAYLOAD_LEN, SYNC_CHAR_1, SYNC_CHAR_2},
-};
+use crate::{SYNC_CHAR_RTCM, error::ParserError, ubx_packets::{match_packet, PacketRef, MAX_PAYLOAD_LEN, SYNC_CHAR_1, SYNC_CHAR_2}};
 
 /// This trait represents an underlying buffer used for the Parser. We provide
 /// implementations for `Vec<u8>` and for `FixedLinearBuffer`, if you want to
@@ -429,7 +426,7 @@ pub struct ParserIter<'a, T: UnderlyingBuffer> {
 impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
     fn find_sync(&self) -> Option<usize> {
         for i in 0..self.buf.len() {
-            if self.buf[i] == SYNC_CHAR_1 {
+            if self.buf[i] == SYNC_CHAR_1 || self.buf[i] == SYNC_CHAR_RTCM {
                 return Some(i);
             }
         }
@@ -493,6 +490,51 @@ impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
             if self.buf.len() < 2 {
                 return None;
             }
+
+            if self.buf[0] == SYNC_CHAR_RTCM {
+                if self.buf.len() < 5 {
+                    return None;
+                }
+
+                // if (self.buf[1] & 0b1111_1100) != 0 {
+
+                // }
+
+                // println!("RTCM Packet {:02x} {:02x} {:02x}", self.buf[0], self.buf[1], self.buf[2]);
+                let len: u16 = (self.buf[1] as u16) << 8 | (self.buf[2] as u16);
+                let len = len as usize;
+                let msg_id = (self.buf[3] as u16) << 4 | (self.buf[4] as u16) >> 4;
+
+                match msg_id {
+                    1074 | 1084 | 1094 | 1124 | 1230 | 4072 => {},
+                    _ => {
+                        self.buf.drain(1);
+                        continue
+                    }
+                }
+
+                // println!("len: {}", len);
+                // self.buf.drain(3);                
+                if self.buf.len() < len + 6 {
+                    return None;
+                }
+
+                print!("len: {} msg_id: {} | ", len, msg_id);
+
+                for i in 0..len + 3 + 3{
+                    print!("{:02x} ", self.buf[i]);
+                }
+                print!("| {:02x} {:02x} {:02x}", self.buf[len+3], self.buf[len+4], self.buf[len+5]);
+                let msg_data = self.buf.take(len + 6).unwrap();
+                println!("");                
+                let packet = PacketRef::Unknown(crate::UbxUnknownPacketRef {
+                    payload: msg_data,
+                    class: 0xf5,
+                    msg_id: 0,
+                });
+                return Some(Ok(packet))
+            }
+
             if self.buf[1] != SYNC_CHAR_2 {
                 self.buf.drain(1);
                 continue;
