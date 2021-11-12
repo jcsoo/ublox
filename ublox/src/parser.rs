@@ -478,17 +478,17 @@ impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
     /// Analog of `core::iter::Iterator::next`, should be switched to
     /// trait implementation after merge of https://github.com/rust-lang/rust/issues/44265
     pub fn next(&mut self) -> Option<Result<PacketRef, ParserError>> {
-        println!("buf len: {}", self.buf.len());
+        // println!("buf len: {}", self.buf.len());
         while self.buf.len() > 0 {
             let pos = match self.find_sync() {
                 Some(x) => x,
                 None => {
-                    println!("S {}", self.buf[0] as char);
+                    // println!("S {}", self.buf[0] as char);
                     self.buf.clear();
                     return None;
                 }
             };
-            println!("sync {:02x} at pos {}, draining", self.buf[pos], pos);
+            // println!("sync {:02x} at pos {}, draining", self.buf[pos], pos);
             self.buf.drain(pos);
 
             if self.buf.len() < 2 {
@@ -497,7 +497,7 @@ impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
 
             if self.buf[0] == SYNC_CHAR_RTCM {
                 if self.buf.len() < 5 {
-                    println!("len < 5");
+                    // println!("len < 5");
                     return None;
                 }
 
@@ -509,7 +509,7 @@ impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
                 let len: u16 = (self.buf[1] as u16) << 8 | (self.buf[2] as u16);
                 let len = len as usize;
                 let msg_id = (self.buf[3] as u16) << 4 | (self.buf[4] as u16) >> 4;
-                println!("msg_id: {}", msg_id);
+                // println!("msg_id: {}", msg_id);
 
                 match msg_id {
                     1074 | 1084 | 1094 | 1124 | 1230 | 4072 => {},
@@ -523,19 +523,19 @@ impl<'a, T: UnderlyingBuffer> ParserIter<'a, T> {
                 // println!("len: {}", len);
                 // self.buf.drain(3);                
                 if self.buf.len() < len + 6 {
-                    println!("len < {}", len + 6);
-                    println!("end buf len: {}", self.buf.len());
+                    // println!("len < {}", len + 6);
+                    // println!("end buf len: {}", self.buf.len());
                     return None;
                 }
 
-                print!("len: {} msg_id: {} | ", len, msg_id);
+                // print!("len: {} msg_id: {} | ", len, msg_id);
 
-                for i in 0..len + 6 {
-                    print!("{:02x} ", self.buf[i]);
-                }
-                print!("| {:02x} {:02x} {:02x}", self.buf[len+3], self.buf[len+4], self.buf[len+5]);
+                // for i in 0..len + 6 {
+                //     print!("{:02x} ", self.buf[i]);
+                // }
+                // print!("| {:02x} {:02x} {:02x}", self.buf[len+3], self.buf[len+4], self.buf[len+5]);
                 let msg_data = self.buf.take(len + 6).unwrap();
-                println!("");                
+                // println!("");                
                 let packet = PacketRef::Unknown(crate::UbxUnknownPacketRef {
                     payload: msg_data,
                     class: 0xf5,
